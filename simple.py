@@ -378,6 +378,7 @@ def main():
 
     if config.ANNOTATE:
         logger.info("Annotating with label {0}".format(config.LABEL))
+        img.label_all(config)
 
     maybe_clean_scratch(config)
 

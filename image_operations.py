@@ -275,3 +275,23 @@ def prepare_tiles(config):
         str(config.GRID_SIZE)+"x"+str(config.GRID_SIZE),
         path.join(config.SCRATCH_PATH, "scene", "tile_%04d.png")
     ])
+
+def label_all(config):
+    # mogrify -fill black -gravity south -pointsize 18 -trim +repage
+    # -stroke black -strokewidth 1 -undercolor '#00000020' -annotate -0+10 "After"
+    # -stroke none -fill white -annotate -0+10 "After" *.png
+    call([
+        'mogrify',
+        '-quiet',
+        '-fill', 'black',
+        '-gravity', 'south',
+        '-pointsize', '18',
+        '-trim',
+        '+repage',
+        '-stroke', 'black', '-strokewidth', '1',
+        '-undercolor', '#00000020',
+        '-annotate', '-0+10', config.LABEL,
+        '-stroke', 'none',
+        '-fill', 'white',
+        '-annotate', '-0+10', config.LABEL, "{0}_tiles/accepted/*.png".format(config.SCENE_NAME)
+    ])
