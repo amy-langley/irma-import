@@ -44,9 +44,13 @@ def compute_coordinate_metadata(row, col, width, height, config):
 
         'center_lat': lat,
         'center_lon': lon,
-        'map_link': generate_map_link(lat, lon)
+        'google_maps_link': generate_gm_link(lat, lon),
+        'open_sm_link': generate_osm_link(lat, lon)
     }
 
 
-def generate_map_link(lat, lon):
-    return "http://maps.google.com/maps?q={0}+{1}&ll={0},{1}&t=k&z=12".format(lat, lon)
+def generate_gm_link(lat, lon):
+    return "http://maps.google.com/maps?q={0}+{1}&ll={0},{1}&t=k&z=15".format(lat, lon)
+
+def generate_osm_link(lat, lon):
+    return "http://www.openstreetmap.org/#map=15/{0}/{1}".format(lat, lon)

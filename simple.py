@@ -116,6 +116,8 @@ def parse_options():
             config.REJECT_TILES = True
         elif arg == "--manifest":
             config.BUILD_MANIFEST = True
+        elif arg == "--annotate":
+            config.ANNOTATE = True
 
         elif arg.startswith("--grid-size="):
             config.GRID_SIZE = int(arg.split("=")[1])
@@ -127,12 +129,16 @@ def parse_options():
             config.CLOUD_THRESHHOLD = int(arg.split("=")[1])
         elif arg.startswith("--cloud-sensitivity="):
             config.CLOUD_SENSITIVITY = int(arg.split("=")[1])
+
+        elif arg.startswith("--label="):
+            config.LABEL = arg.split("=")[1]
         else:
             config.SCENE_DIR = arg
 
     config.SCENE_NAME = find_scene_name(config)
-    config.NEW_MASK = path.join(config.SCENE_DIR, config.SCENE_NAME + "_pixel_qa.tif")
-    config.METADATA_SRC = path.join(config.SCENE_DIR, config.SCENE_NAME + ".xml")
+    config.NEW_MASK = path.join(config.SCENE_DIR, "B02.jp2")
+    config.METADATA_SRC = path.join(config.SCENE_DIR, "metadata.xml")
+    config.JSON_SRC = path.join(config.SCENE_DIR, "tileInfo.json")
     config.INPUT_FILE = config.NEW_MASK
 
 def generate_mask_tiles():
@@ -142,13 +148,13 @@ def generate_mask_tiles():
         "x" + str(config.GRID_SIZE) + " pixels")
 
     logger.info("Generating land mask tiles")
-    img.prepare_land_mask(config)
+    # img.prepare_land_mask(config)
 
     logger.info("Generating cloud mask tiles")
-    img.prepare_cloud_mask(config)
+    # img.prepare_cloud_mask(config)
 
-    generated_count = len(get_files_by_extension(path.join(config.SCRATCH_PATH, "land"), "png"))
-    logger.info("Generated " + str(generated_count) + " tiles")
+    # generated_count = len(get_files_by_extension(path.join(config.SCRATCH_PATH, "land"), "png"))
+    # logger.info("Generated " + str(generated_count) + " tiles")
 
 def apply_rules(candidates, rejects, subdirectory, rules):
     accum = []
@@ -245,30 +251,30 @@ def main():
     build_output(config.SCENE_NAME)
 
     config.SATELLITE = LANDSAT
-    metadata = parse_metadata(config.SCENE_DIR, config.METADATA_SRC)
+    metadata = parse_metadata(config.SCENE_DIR, config.METADATA_SRC, config.JSON_SRC)
     config.METADATA = metadata
-    if config.METADATA['spacecraft'] == 'LANDSAT_8':
-        config.SATELLITE = LANDSAT8
+    # if config.METADATA['spacecraft'] == 'LANDSAT_8':
+        # config.SATELLITE = LANDSAT8
 
-    config.RED_CHANNEL = path.join(
-        config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['red'] + ".tif")
-    config.GREEN_CHANNEL = path.join(
-        config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['green'] + ".tif")
-    config.BLUE_CHANNEL = path.join(
-        config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['blue'] + ".tif")
-    config.INFRARED_CHANNEL = path.join(
-        config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['infrared'] + ".tif")
+    config.RED_CHANNEL = path.join(config.SCENE_DIR, "B04.jp2")
+        # config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['red'] + ".tif")
+    config.GREEN_CHANNEL = path.join(config.SCENE_DIR, "B03.jp2")
+        # config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['green'] + ".tif")
+    config.BLUE_CHANNEL = path.join(config.SCENE_DIR, "B02.jp2")
+        # config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['blue'] + ".tif")
+    config.INFRARED_CHANNEL = path.join(config.SCENE_DIR, "B03.jp2")
+        # config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['infrared'] + ".tif")
 
-    logger.info("Building water mask")
-    config.WATER_MASK = path.join(config.SCRATCH_PATH, "water_mask.png")
-    img.build_mask_files(config, "water_lut.pgm", config.WATER_MASK)
-    logger.info("Building cloud mask")
-    config.CLOUD_MASK = path.join(config.SCRATCH_PATH, "cloud_mask.png")
-    img.build_mask_files(config, "cloud_lut.pgm", config.CLOUD_MASK)
-    logger.info("Building snow mask")
-    config.SNOW_MASK = path.join(config.SCRATCH_PATH, "snow_mask.png")
-    img.build_mask_files(config, "snow_lut.pgm", config.SNOW_MASK)
-    config.INPUT_FILE = config.WATER_MASK
+    # logger.info("Building water mask")
+    # config.WATER_MASK = path.join(config.SCRATCH_PATH, "water_mask.png")
+    # img.build_mask_files(config, "water_lut.pgm", config.WATER_MASK)
+    # logger.info("Building cloud mask")
+    # config.CLOUD_MASK = path.join(config.SCRATCH_PATH, "cloud_mask.png")
+    # img.build_mask_files(config, "cloud_lut.pgm", config.CLOUD_MASK)
+    # logger.info("Building snow mask")
+    # config.SNOW_MASK = path.join(config.SCRATCH_PATH, "snow_mask.png")
+    # img.build_mask_files(config, "snow_lut.pgm", config.SNOW_MASK)
+    # config.INPUT_FILE = config.WATER_MASK
 
     if config.ASSEMBLE_IMAGE:
         logger.info("Processing source data to remove negative pixels")
@@ -276,12 +282,14 @@ def main():
         boost = img.boost_image
         clamp(config.RED_CHANNEL, "red", config, False)
         clamp(config.INFRARED_CHANNEL, "green", config, False)
-        clamp(config.BLUE_CHANNEL, "blue", config, True)
-        boost(config.INFRARED_CHANNEL, config)
+        # clamp(config.BLUE_CHANNEL, "blue", config, True)
+        clamp(config.BLUE_CHANNEL, "blue", config, False)
+        # clamp(config.INFRARED_CHANNEL, "infrared", config, False)
+        # boost(config.INFRARED_CHANNEL, config)
         config.RED_CHANNEL = path.join(config.SCRATCH_PATH, "red.png")
         config.GREEN_CHANNEL = path.join(config.SCRATCH_PATH, "green.png")
         config.BLUE_CHANNEL = path.join(config.SCRATCH_PATH, "blue.png")
-        config.INFRARED_CHANNEL = path.join(config.SCRATCH_PATH, "boost.png")
+        config.INFRARED_CHANNEL = path.join(config.SCRATCH_PATH, "infrared.png")
         img.assemble_image(config)
     else:
         logger.info("Skipping scene generation")
@@ -302,7 +310,8 @@ def main():
 
     if config.REJECT_TILES or config.VISUALIZE_SORT:
 
-        retained_tiles = get_files_by_extension(path.join(config.SCRATCH_PATH, "land"), "png")
+        # retained_tiles = get_files_by_extension(path.join(config.SCRATCH_PATH, "land"), "png")
+        retained_tiles = get_files_by_extension(path.join(config.SCRATCH_PATH, "scene"), "png")
 
         if config.REMOVE_CLOUDS:
             retained_tiles = apply_rules(
@@ -366,6 +375,9 @@ def main():
         write_manifest(
             path.join("{0}_tiles".format(config.SCENE_NAME), "accepted", "manifest.csv"),
             accepts)
+
+    if config.ANNOTATE:
+        logger.info("Annotating with label {0}".format(config.LABEL))
 
     maybe_clean_scratch(config)
 

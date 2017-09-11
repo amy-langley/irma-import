@@ -1,54 +1,39 @@
 import logging
+import json
 from lxml import etree
 
 def get_field_text(tree, path):
-    nsmap = {"espa": tree.getroot().nsmap[None]}
+    nsmap = {"n1": tree.getroot().nsmap['n1']}
     node = tree.xpath(path, namespaces=nsmap)
     if len(node) > 0:
         return node[0].text
     return ''
 
-def parse_metadata(scene, xml_filename):
+def parse_metadata(scene, xml_filename, json_filename):
     logger = logging.getLogger(scene)
     logger.info("Parsing XML metadata from {0}".format(xml_filename))
 
     result = {'!scene': scene}
 
     tree = etree.parse(xml_filename)
-    nsmap = {"espa": tree.getroot().nsmap[None]}
+    with open(json_filename, 'r') as myfile:
+        tile_json = myfile.read()
+    tile = json.loads(tile_json)
 
-    result['acquired_date'] = get_field_text(tree, "espa:global_metadata/espa:acquisition_date")
-    result['acquired_time'] = get_field_text(tree, "espa:global_metadata/espa:scene_center_time")
-    result['sensor_id'] = get_field_text(tree, "espa:global_metadata/espa:instrument")
-    result['spacecraft'] = get_field_text(tree, 'espa:global_metadata/espa:satellite')
+    scene_time = get_field_text(tree, "n1:General_Info/SENSING_TIME")
+    result['acquired_date'] = scene_time.split('T')[0]
+    result['acquired_time'] = scene_time.split('T')[1]
 
-    result['!earth_sun_distance'] = get_field_text(
-        tree,
-        "espa:global_metadata/espa:earth_sun_distance")
+    coords = tile['tileGeometry']['coordinates'][0]
+    result["#scene_corner_UL_x"] = coords[0][0]
+    result["#scene_corner_UL_y"] = coords[0][1]
+    result["#scene_corner_UR_x"] = coords[1][0]
+    result["#scene_corner_UR_y"] = coords[1][1]
+    result["#scene_corner_LR_x"] = coords[2][0]
+    result["#scene_corner_LR_y"] = coords[2][1]
+    result["#scene_corner_LL_x"] = coords[3][0]
+    result["#scene_corner_LL_y"] = coords[3][1]
 
-    angles = tree.xpath("espa:global_metadata/espa:solar_angles", namespaces=nsmap)
-    if len(angles) > 0:
-        result['!sun_azimuth'] = angles[0].get("azimuth")
-        result['!sun_zenith'] = angles[0].get("zenith")
-
-    covers = tree.xpath(
-        "espa:bands/espa:band[@name='cfmask']/espa:percent_coverage/espa:cover",
-        namespaces=nsmap)
-    for cover in covers:
-        if cover.get("type") == "cloud":
-            result['!cloud_cover'] = cover.text
-        if cover.get("type") == "water":
-            result['!water_cover'] = cover.text
-
-    result['#utm_zone'] = get_field_text(
-        tree,
-        "espa:global_metadata/espa:projection_information/espa:utm_proj_params/espa:zone_code")
-
-    corners = tree.xpath(
-        "espa:global_metadata/espa:projection_information/espa:corner_point",
-        namespaces=nsmap)
-    for corner in corners:
-        result["#scene_corner_{0}_x".format(corner.get("location"))] = corner.get("x")
-        result["#scene_corner_{0}_y".format(corner.get("location"))] = corner.get("y")
+    result["#utm_zone"] = tile["utmZone"]
 
     return result

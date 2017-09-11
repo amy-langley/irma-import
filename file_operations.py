@@ -4,8 +4,9 @@ from shutil import rmtree, copy
 import tempfile
 
 def find_scene_name(config):
-    files = get_files_by_extension(config.SCENE_DIR, "xml")
-    return path.splitext(files[0])[0]
+    # files = get_files_by_extension(config.SCENE_DIR, "xml")
+    # return path.splitext(files[0])[0]
+    return config.SCENE_DIR
 
 def accept_tile(filename, config):
     copy(

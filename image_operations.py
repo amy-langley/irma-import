@@ -141,7 +141,7 @@ def boost_image(source, config):
     _clamp_image(source, path.join(config.SCRATCH_PATH, "boost.png"), config, True, False)
 
 def _clamp_image(source, dest, config, boost, brighten):
-    lut = ("clamp_lut.pgm" if boost else "boost_lut.pgm")
+    lut = ("boost_lut.pgm" if boost else "clamp_lut.pgm")
 
     new_args = [
         "convert",
@@ -160,15 +160,14 @@ def _clamp_image(source, dest, config, boost, brighten):
         "-depth",
         "8",
         "-clamp",
-        path.join(config.SCRATCH_PATH, "snow_mask.png"),
-        "-compose",
-        "lighten",
-        "-composite",
     ]
 
     if brighten:
         new_args.extend(["-brightness-contrast", "10"])
     new_args.extend([dest])
+
+    print new_args
+
     call(new_args)
 
 def assemble_image(config):
@@ -180,74 +179,75 @@ def assemble_image(config):
 
     logger.info("Generating simplified land/water masks")
 
-    water_mask_args = [
-        "convert",
-        "-quiet",
-        "-type",
-        "GrayScale",
-        config.WATER_MASK,
-        "-blur",
-        "5x2",
-        "-white-threshold",
-        "254",
-        "-blur",
-        "20x2",
-        "-threshold",
-        "254",
-        path.join(config.SCRATCH_PATH, "water.png")
-    ]
+    # water_mask_args = [
+    #     "convert",
+    #     "-quiet",
+    #     "-type",
+    #     "GrayScale",
+    #     config.WATER_MASK,
+    #     "-blur",
+    #     "5x2",
+    #     "-white-threshold",
+    #     "254",
+    #     "-blur",
+    #     "20x2",
+    #     "-threshold",
+    #     "254",
+    #     path.join(config.SCRATCH_PATH, "water.png")
+    # ]
+    #
+    # land_mask_args = [
+    #     "convert",
+    #     "-quiet",
+    #     "-type",
+    #     "GrayScale",
+    #     path.join(config.SCRATCH_PATH, "water.png"),
+    #     "-negate",
+    #     path.join(config.SCRATCH_PATH, "land.png")
+    # ]
+    # call(water_mask_args)
+    # call(land_mask_args)
 
-    land_mask_args = [
-        "convert",
-        "-quiet",
-        "-type",
-        "GrayScale",
-        path.join(config.SCRATCH_PATH, "water.png"),
-        "-negate",
-        path.join(config.SCRATCH_PATH, "land.png")
-    ]
-    call(water_mask_args)
-    call(land_mask_args)
+    # mask_boost_args = [
+    #     "convert",
+    #     "-quiet",
+    #     "-type",
+    #     "GrayScale",
+    #     config.INFRARED_CHANNEL,
+    #     path.join(config.SCRATCH_PATH, "water.png"),
+    #     "-compose",
+    #     "darken",
+    #     "-composite",
+    #     path.join(config.SCRATCH_PATH, "masked.png")
+    # ]
+    # logger.info("Masking boosted green channel")
+    # call(mask_boost_args)
 
-    mask_boost_args = [
-        "convert",
-        "-quiet",
-        "-type",
-        "GrayScale",
-        config.INFRARED_CHANNEL,
-        path.join(config.SCRATCH_PATH, "water.png"),
-        "-compose",
-        "darken",
-        "-composite",
-        path.join(config.SCRATCH_PATH, "masked.png")
-    ]
-    logger.info("Masking boosted green channel")
-    call(mask_boost_args)
-
-    build_green_args = [
-        "convert",
-        "-quiet",
-        "-type",
-        "GrayScale",
-        green,
-        path.join(config.SCRATCH_PATH, "land.png"),
-        "-compose",
-        "darken",
-        "-composite",
-        path.join(config.SCRATCH_PATH, "masked.png"),
-        "-compose",
-        "add",
-        "-composite",
-        path.join(config.SCRATCH_PATH, "green_final.png")
-    ]
-    logger.info("Building final green channel")
-    call(build_green_args)
+    # build_green_args = [
+    #     "convert",
+    #     "-quiet",
+    #     "-type",
+    #     "GrayScale",
+    #     green,
+    #     path.join(config.SCRATCH_PATH, "land.png"),
+    #     "-compose",
+    #     "darken",
+    #     "-composite",
+    #     path.join(config.SCRATCH_PATH, "masked.png"),
+    #     "-compose",
+    #     "add",
+    #     "-composite",
+    #     path.join(config.SCRATCH_PATH, "green_final.png")
+    # ]
+    # logger.info("Building final green channel")
+    # call(build_green_args)
 
     assemble_args = [
         "convert",
         "-quiet",
         red,
-        path.join(config.SCRATCH_PATH, "green_final.png"),
+        # path.join(config.SCRATCH_PATH, "green_final.png"),
+        green,
         blue,
         "-set",
         "colorspace",
