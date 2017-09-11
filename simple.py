@@ -215,26 +215,26 @@ def main():
 
     parse_options()
 
-    if  (not config.GENERATE_MASK_TILES and
-         not config.REJECT_TILES and
-         not config.VISUALIZE_SORT and
-         not config.ASSEMBLE_IMAGE and
-         not config.SLICE_IMAGE and
-         not config.BUILD_MANIFEST and
-         not config.REBUILD):
-        usage()
-        return
-
-    if ((config.GENERATE_MASK_TILES or
-         config.REJECT_TILES or
-         config.VISUALIZE_SORT or
-         config.ASSEMBLE_IMAGE or
-         config.BUILD_MANIFEST or
-         config.SLICE_IMAGE) and
-            config.SCENE_DIR == ''):
-        usage()
-        return
-
+    # if  (not config.GENERATE_MASK_TILES and
+    #      not config.REJECT_TILES and
+    #      not config.VISUALIZE_SORT and
+    #      not config.ASSEMBLE_IMAGE and
+    #      not config.SLICE_IMAGE and
+    #      not config.BUILD_MANIFEST and
+    #      not config.REBUILD):
+    #     usage()
+    #     return
+    #
+    # if ((config.GENERATE_MASK_TILES or
+    #      config.REJECT_TILES or
+    #      config.VISUALIZE_SORT or
+    #      config.ASSEMBLE_IMAGE or
+    #      config.BUILD_MANIFEST or
+    #      config.SLICE_IMAGE) and
+    #         config.SCENE_DIR == ''):
+    #     usage()
+    #     return
+    #
     logger = logging.getLogger(config.SCENE_NAME)
     logger.setLevel(logging.INFO)
     logger.info("Processing start")
@@ -248,7 +248,7 @@ def main():
         build_scratch(config)
 
     logger.info("Building scene tile output directory")
-    build_output(config.SCENE_NAME)
+    build_output(config)
 
     config.SATELLITE = LANDSAT
     metadata = parse_metadata(config.SCENE_DIR, config.METADATA_SRC, config.JSON_SRC)
@@ -364,16 +364,16 @@ def main():
             reject_tile(filename, config)
             rejects.append(build_dict_for_csv(filename, "Too Cloudy", config))
 
-        logger.info("Writing csv file")
-        rejects = sorted(rejects, key=lambda k: k['#filename'])
-        write_rejects(
-            path.join("{0}_tiles".format(config.SCENE_NAME), "rejected", "rejected.csv"),
-            rejects)
+        # logger.info("Writing csv file")
+        # rejects = sorted(rejects, key=lambda k: k['#filename'])
+        # write_rejects(
+        #     path.join("{0}_tiles".format(config.SCENE_NAME), "rejected", "rejected.csv"),
+        #     rejects)
 
     if config.BUILD_MANIFEST:
         logger.info("Writing manifest")
         write_manifest(
-            path.join("{0}_tiles".format(config.SCENE_NAME), "accepted", "manifest.csv"),
+            path.join("{0}_tiles".format(config.SCENE_NAME), config.LABEL, "manifest.csv"),
             accepts)
 
     if config.ANNOTATE:

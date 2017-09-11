@@ -293,5 +293,5 @@ def label_all(config):
         '-annotate', '-0+10', config.LABEL,
         '-stroke', 'none',
         '-fill', 'white',
-        '-annotate', '-0+10', config.LABEL, "{0}_tiles/accepted/*.png".format(config.SCENE_NAME)
+        '-annotate', '-0+10', config.LABEL, "{0}_tiles/{1}/*.png".format(config.SCENE_NAME, config.LABEL)
     ])
