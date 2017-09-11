@@ -378,7 +378,7 @@ def main():
     if config.BUILD_MANIFEST:
         logger.info("Writing manifest")
         write_manifest(
-            path.join("{0}_tiles".format(config.SCENE_NAME), config.LABEL, "manifest.csv"),
+            path.join("{0}_tiles".format(config.SCENE_NAME), "manifest.csv"),
             accepts)
 
     if config.ANNOTATE:
