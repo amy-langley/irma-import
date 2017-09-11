@@ -132,10 +132,15 @@ def parse_options():
 
         elif arg.startswith("--label="):
             config.LABEL = arg.split("=")[1]
+        elif arg.startswith("--name="):
+            config.SCENE_NAME = arg.split("=")[1]
+
         else:
             config.SCENE_DIR = arg
 
-    config.SCENE_NAME = find_scene_name(config)
+    if config.SCENE_NAME is None:
+        config.SCENE_NAME = find_scene_name(config)
+
     config.NEW_MASK = path.join(config.SCENE_DIR, "B02.jp2")
     config.METADATA_SRC = path.join(config.SCENE_DIR, "metadata.xml")
     config.JSON_SRC = path.join(config.SCENE_DIR, "tileInfo.json")
