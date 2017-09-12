@@ -1,11 +1,15 @@
 config = type('Config', (object,), {
-    'GRID_SIZE': 400,
+    # 'GRID_SIZE': 500,
+    'GRID_SIZE': 250,
     'MASK_BLUR': "0x10",
     'SCRATCH_PATH': "scratch",
     'LAND_THRESHHOLD': 10,
     'LAND_SENSITIVITY': 30,
     'CLOUD_THRESHHOLD': 10,
     'CLOUD_SENSITIVITY': 80,
+    'LABEL': 'accepted',
+    'ANNOTATE': False,
+    'SCENE_NAME': None,
 
     'EROS_USERNAME': 'zooniverse-test',
     'EROS_PASSWORD': 'PASSWORD',
@@ -22,7 +26,8 @@ config = type('Config', (object,), {
     'REBUILD': False,
     'BUILD_MANIFEST': False,
 
-    'WITHTEMPDIR': False,
+    #'WITHTEMPDIR': False,
+    'WITHTEMPDIR': True,
 
     'width': 0
 })()

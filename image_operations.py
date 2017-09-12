@@ -208,6 +208,7 @@ def label_all(config):
     call([
         'mogrify',
         '-quiet',
+        '-resize', '500x500',
         '-fill', 'black',
         '-gravity', 'south',
         '-pointsize', '18',
