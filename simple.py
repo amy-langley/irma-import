@@ -17,8 +17,7 @@ logging.basicConfig(
     format='[ff-import %(name)s] %(levelname)s %(asctime)-15s %(message)s'
 )
 
-LANDSAT = {'red': 'band5', 'green': 'band2', 'blue': 'band3', 'infrared': 'band4'}
-LANDSAT8 = {'red': 'band6', 'green': 'band3', 'blue': 'band4', 'infrared': 'band5'}
+# python simple.py --clean --assemble --generate-tiles --reject --manifest --label=Before --annotate --name=20QPD input/foo
 
 def usage():
     print """
@@ -52,8 +51,6 @@ channel to aid in kelp-spotting.
     --manifest              Build a manifest file for Panoptes subject upload
 
     --grid-size=XXX         Set custom tile size
-
-    --source-dir=MY_PATH    Load scenes from a specified directory
 
     --land-threshhold=XX    Configure land detection
     --land-sensitivity=XX
@@ -285,17 +282,15 @@ def main():
     if config.ASSEMBLE_IMAGE:
         logger.info("Processing source data to remove negative pixels")
         clamp = img.clamp_image
-        boost = img.boost_image
+
         clamp(config.RED_CHANNEL, "red", config, False)
-        clamp(config.INFRARED_CHANNEL, "green", config, False)
-        # clamp(config.BLUE_CHANNEL, "blue", config, True)
+        clamp(config.GREEN_CHANNEL, "green", config, False)
         clamp(config.BLUE_CHANNEL, "blue", config, False)
-        # clamp(config.INFRARED_CHANNEL, "infrared", config, False)
-        # boost(config.INFRARED_CHANNEL, config)
+
         config.RED_CHANNEL = path.join(config.SCRATCH_PATH, "red.png")
         config.GREEN_CHANNEL = path.join(config.SCRATCH_PATH, "green.png")
         config.BLUE_CHANNEL = path.join(config.SCRATCH_PATH, "blue.png")
-        config.INFRARED_CHANNEL = path.join(config.SCRATCH_PATH, "infrared.png")
+
         img.assemble_image(config)
     else:
         logger.info("Skipping scene generation")
@@ -309,72 +304,12 @@ def main():
     else:
         logger.info("Skipping scene tile generation")
 
-    if config.GENERATE_MASK_TILES:
-        generate_mask_tiles()
-    else:
-        logger.info("Skipping mask generation")
-
-    if config.REJECT_TILES or config.VISUALIZE_SORT:
-
-        # retained_tiles = get_files_by_extension(path.join(config.SCRATCH_PATH, "land"), "png")
-        retained_tiles = get_files_by_extension(path.join(config.SCRATCH_PATH, "scene"), "png")
-
-        if config.REMOVE_CLOUDS:
-            retained_tiles = apply_rules(
-                retained_tiles, too_cloudy, "cloud", [
-                    lambda imin, imax, imean, idev: float(imin) < config.CLOUD_THRESHHOLD,
-                    lambda imin, imax, imean, idev: (
-                        float(imean) < config.CLOUD_THRESHHOLD or
-                        float(idev) > config.CLOUD_SENSITIVITY
-                    )
-                ])
-        else:
-            logger.info("Skipping cloud removal")
-
-        if config.REMOVE_LAND:
-            retained_tiles = apply_rules(
-                retained_tiles, no_water, "land", [
-                    lambda imin, imax, imean, idev: float(imax) > config.LAND_THRESHHOLD,
-                    lambda imin, imax, imean, idev: (
-                        float(imean) > config.LAND_THRESHHOLD or
-                        float(idev) > config.LAND_SENSITIVITY
-                    )
-                ])
-        else:
-            logger.info("Skipping land removal")
-
-
-    if config.VISUALIZE_SORT:
-        logger.info(str(len(retained_tiles))+" tiles retained")
-        logger.info(str(len(no_water))+" tiles without water rejected")
-        logger.info(str(len(too_cloudy))+" tiles rejected for clouds")
-
-        logger.info("Generating tile visualization")
-        land = img.generate_rectangles(no_water, config.width, config.GRID_SIZE)
-        clouds = img.generate_rectangles(too_cloudy, config.width, config.GRID_SIZE)
-        water = img.generate_rectangles(retained_tiles, config.width, config.GRID_SIZE)
-        img.draw_visualization(land, clouds, water, config)
-
     if config.REJECT_TILES:
-        logger.info("Copying accepted tiles")
+        logger.info("Copying all tiles")
+        retained_tiles = get_files_by_extension(path.join(config.SCRATCH_PATH, "scene"), "png")
         for filename in retained_tiles:
             accept_tile(filename, config)
             accepts.append(build_dict_for_csv(filename, "Accepted", config))
-
-        logger.info("Copying rejected tiles")
-        for filename in no_water:
-            reject_tile(filename, config)
-            rejects.append(build_dict_for_csv(filename, "No Water", config))
-
-        for filename in too_cloudy:
-            reject_tile(filename, config)
-            rejects.append(build_dict_for_csv(filename, "Too Cloudy", config))
-
-        # logger.info("Writing csv file")
-        # rejects = sorted(rejects, key=lambda k: k['#filename'])
-        # write_rejects(
-        #     path.join("{0}_tiles".format(config.SCENE_NAME), "rejected", "rejected.csv"),
-        #     rejects)
 
     if config.BUILD_MANIFEST:
         logger.info("Writing manifest")
