@@ -253,31 +253,13 @@ def main():
     logger.info("Building scene tile output directory")
     build_output(config)
 
-    config.SATELLITE = LANDSAT
     metadata = parse_metadata(config.SCENE_DIR, config.METADATA_SRC, config.JSON_SRC)
     config.METADATA = metadata
-    # if config.METADATA['spacecraft'] == 'LANDSAT_8':
-        # config.SATELLITE = LANDSAT8
 
     config.RED_CHANNEL = path.join(config.SCENE_DIR, "B04.jp2")
-        # config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['red'] + ".tif")
     config.GREEN_CHANNEL = path.join(config.SCENE_DIR, "B03.jp2")
-        # config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['green'] + ".tif")
     config.BLUE_CHANNEL = path.join(config.SCENE_DIR, "B02.jp2")
-        # config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['blue'] + ".tif")
     config.INFRARED_CHANNEL = path.join(config.SCENE_DIR, "B03.jp2")
-        # config.SCENE_DIR, config.SCENE_NAME + "_sr_" + config.SATELLITE['infrared'] + ".tif")
-
-    # logger.info("Building water mask")
-    # config.WATER_MASK = path.join(config.SCRATCH_PATH, "water_mask.png")
-    # img.build_mask_files(config, "water_lut.pgm", config.WATER_MASK)
-    # logger.info("Building cloud mask")
-    # config.CLOUD_MASK = path.join(config.SCRATCH_PATH, "cloud_mask.png")
-    # img.build_mask_files(config, "cloud_lut.pgm", config.CLOUD_MASK)
-    # logger.info("Building snow mask")
-    # config.SNOW_MASK = path.join(config.SCRATCH_PATH, "snow_mask.png")
-    # img.build_mask_files(config, "snow_lut.pgm", config.SNOW_MASK)
-    # config.INPUT_FILE = config.WATER_MASK
 
     if config.ASSEMBLE_IMAGE:
         logger.info("Processing source data to remove negative pixels")
