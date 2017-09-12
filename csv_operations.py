@@ -6,7 +6,7 @@ def write_manifest(csv_filename, accepted):
 
     with open(csv_filename, 'w') as csvfile:
 
-        fieldnames = ['#filename', '#row', '#column']
+        fieldnames = ['#filename1', '#filename2', '#row', '#column']
 
         for key in sorted(accepted[0].keys()):
             if key == "#reason":

@@ -197,7 +197,8 @@ def build_dict_for_csv(filename, reason, config):
     [row, column] = index_to_location(filename, config.width, config.GRID_SIZE)
 
     my_dict = {
-        '#filename': filename,
+        '#filename1': 'after_' + filename,
+        '#filename2': 'before_' + filename,
         '#reason': reason,
         '#row': row,
         '#column': column,
