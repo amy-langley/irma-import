@@ -11,19 +11,23 @@ def find_scene_name(config):
 def accept_tile(filename, config):
     copy(
         path.join(config.SCRATCH_PATH, "scene", filename),
-        path.join("{0}_tiles".format(config.SCENE_NAME), config.LABEL, filename)
+        path.join('output', "{0}_tiles".format(config.SCENE_NAME), config.LABEL, filename)
     )
 
 def reject_tile(filename, config):
     copy(
         path.join(config.SCRATCH_PATH, "scene", filename),
-        path.join("{0}_tiles".format(config.SCENE_NAME), "rejected", filename)
+        path.join('output', "{0}_tiles".format(config.SCENE_NAME), "rejected", filename)
     )
 
 def build_output(config):
     scene_name = config.SCENE_NAME
     logger = logging.getLogger(scene_name)
-    target = "{0}_tiles".format(scene_name)
+
+    if not path.exists('output'):
+        mkdir('output')
+
+    target = path.join('output', "{0}_tiles".format(scene_name))
 
     if not path.exists(target):
         mkdir(target)

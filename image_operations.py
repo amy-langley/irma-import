@@ -125,7 +125,7 @@ def draw_visualization(land, clouds, water, config):
         + ["-fill", "rgba(0,0,255,0.5)"] \
         + water \
         + ["-alpha", "remove"] \
-        + ["-resize", "1000x1000", config.SCENE_NAME + "_tiles/visualize.png"]
+        + ["-resize", "1000x1000", path.join('output', config.SCENE_NAME + '_tiles', 'visualize.png')]
 
     call(args)
 
@@ -263,7 +263,7 @@ def assemble_image(config):
     call([
         "cp",
         path.join(config.SCRATCH_PATH, "render.png"),
-        config.SCENE_NAME + "_tiles/render.png"
+        path.join('output', config.SCENE_NAME + '_tiles', 'render.png')
     ])
 
 def prepare_tiles(config):
@@ -293,5 +293,5 @@ def label_all(config):
         '-annotate', '-0+10', config.LABEL,
         '-stroke', 'none',
         '-fill', 'white',
-        '-annotate', '-0+10', config.LABEL, "{0}_tiles/{1}/*.png".format(config.SCENE_NAME, config.LABEL)
+        '-annotate', '-0+10', config.LABEL, "output/{0}_tiles/{1}/*.png".format(config.SCENE_NAME, config.LABEL)
     ])

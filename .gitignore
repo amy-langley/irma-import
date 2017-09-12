@@ -1,6 +1,8 @@
 *.pyc
 /temp/*
 /scratch/*
+/input/*
+/output/*
 /output.png
 /tiles/*
 /config.py
